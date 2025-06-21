@@ -32,7 +32,6 @@
 		<None Include="NUGETREADME.md" />
 	</ItemGroup>
 
-	<!-- .NET 8'e özel paket referansları -->
 	<ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
 		<PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="8.0.17" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.17" />
@@ -44,7 +43,6 @@
 		</PackageReference>
 	</ItemGroup>
 
-	<!-- .NET 9'a özel paket referansları -->
 	<ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
 		<PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="9.0.5" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.5" />
