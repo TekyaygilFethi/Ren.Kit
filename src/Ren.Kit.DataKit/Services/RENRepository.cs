@@ -169,7 +169,6 @@ public class RENRepository<TEntity> : IRENRepository<TEntity> where TEntity : cl
     /// <inheritdoc/>
     public virtual Task UpdateAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
-        // Bu işlem EF Core'da sync, awaitable bir şey yok.
         _context.Entry(entity).State = EntityState.Modified;
         return Task.CompletedTask;
     }
