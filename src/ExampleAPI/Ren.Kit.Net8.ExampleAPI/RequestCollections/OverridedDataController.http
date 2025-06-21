@@ -1,0 +1,4 @@
+@baseUrl = https://localhost:7161
+
+### Get employee repository (demonstration, returns 200 OK)
+GET {{baseUrl}}/api/OverridedData/get-repository?key=testKey

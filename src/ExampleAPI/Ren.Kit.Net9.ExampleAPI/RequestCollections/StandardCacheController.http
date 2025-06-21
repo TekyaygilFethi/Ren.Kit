@@ -1,0 +1,33 @@
+﻿@baseUrl = https://localhost:7032
+@cacheKey = myKey
+@autoKey = autoKey
+
+###
+# 1. Add or update an item in the cache (POST)
+POST {{baseUrl}}/api/StandardCache/set?key={{cacheKey}}
+Content-Type: application/json
+
+{
+  "value": 123,
+  "message": "Hello world!"
+}
+
+###
+# 2. Get an item from the cache as object (GET)
+GET {{baseUrl}}/api/StandardCache/get?key={{cacheKey}}
+
+###
+# 3. Get an item as string from the cache (GET)
+GET {{baseUrl}}/api/StandardCache/get-string?key={{cacheKey}}
+
+###
+# 4. Remove a cache key (DELETE)
+DELETE {{baseUrl}}/api/StandardCache/remove?key={{cacheKey}}
+
+###
+# 5. Get or create a cache value (GET)
+GET {{baseUrl}}/api/StandardCache/get-or-create?key={{autoKey}}
+
+###
+# 6. Clear all cache (DELETE)
+DELETE {{baseUrl}}/api/StandardCache/clear

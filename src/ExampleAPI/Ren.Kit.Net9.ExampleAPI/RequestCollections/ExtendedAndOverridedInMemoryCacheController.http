@@ -1,0 +1,14 @@
+@baseUrl = https://localhost:7032
+@cacheKey = myCustomKey
+
+### 1. Call Additional Method (with key query param)
+GET {{baseUrl}}/api/ExtendedAndOverridedInMemoryCache/additional-method?key={{cacheKey}}
+
+### 2. Set a value in cache
+POST {{baseUrl}}/api/ExtendedAndOverridedInMemoryCache/set?key={{cacheKey}}
+Content-Type: application/json
+
+{
+  "value": 42,
+  "message": "This is a custom value!"
+}

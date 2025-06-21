@@ -1,0 +1,42 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<Title>REN.Kit.DataKit</Title>
+		<Authors>Fethi Tekyaygil</Authors>
+		<Description>
+			A lightweight, extensible data access toolkit for .NET. Includes generic repository and unit of work patterns with advanced transaction management and bulk operation support. Fully compatible with dependency injection and high-performance applications.
+		</Description>
+		<PackageProjectUrl>https://github.com/TekyaygilFethi/Ren.Kit</PackageProjectUrl>
+		<PackageIcon>reindeer.png</PackageIcon>
+		<RepositoryUrl>https://github.com/TekyaygilFethi/Ren.Kit</RepositoryUrl>
+		<PackageReleaseNotes>
+			- Initial release: Includes generic repository and unit of work implementations for EF Core.
+			- Advanced transaction support and async APIs.
+			- Bulk insert/update/delete with EFCore.BulkExtensions integration.
+		</PackageReleaseNotes>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+		<PackageTags>
+			efcore repository unitofwork data-access orm database bulk bulk-operations dotnet netcore transactions scalable di backend
+		</PackageTags>
+		<PackageReadmeFile>NUGETREADME.md</PackageReadmeFile>
+		<Copyright>Copyright (c) 2025 Fethi Tekyaygil</Copyright>
+		<Version>1.0.0</Version>
+		<TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+	</PropertyGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
+		<PackageReference Include="EFCore.BulkExtensions" Version="8.1.3" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.17" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.17" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
+		<PackageReference Include="EFCore.BulkExtensions" Version="8.1.3" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.6" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.6" />
+	</ItemGroup>
+
+</Project>

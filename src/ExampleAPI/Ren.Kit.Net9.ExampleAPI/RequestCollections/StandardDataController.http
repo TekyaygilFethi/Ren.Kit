@@ -1,0 +1,77 @@
+@baseUrl = https://localhost:7032
+@employeeId = 4cb52314-d3b6-48d8-bbc5-dbee7a2b4ed1
+@departmentId = e4de5ce3-7df1-441c-91f3-d7d7cbf9cb1b
+
+### 0. Create Mock Department
+POST {{baseUrl}}/api/StandardData/Departments/create-mock?id={{departmentId}}&name=Engineering
+
+### 1. Get departments with optional name filter
+GET {{baseUrl}}/api/StandardData/Departments/filtered?name=Engineering
+
+### 2. Get employees ordered by salary (ascending)
+GET {{baseUrl}}/api/StandardData/Employees/ordered
+
+### 3. Get single employee by id
+GET {{baseUrl}}/api/StandardData/Employee/single?id={{employeeId}}
+
+### 4. Bulk insert employees
+POST {{baseUrl}}/api/StandardData/Employees/bulk-insert
+Content-Type: application/json
+
+[
+  {
+    "id": "11111111-2222-3333-4444-555555555555",
+    "name": "Alice Johnson",
+    "salary": 65000,
+    "departmentId": "{{departmentId}}"
+  },
+  {
+    "id": "66666666-7777-8888-9999-000000000000",
+    "name": "Bob Smith",
+    "salary": 70000,
+    "departmentId": "{{departmentId}}"
+  }
+]
+
+### 5. Do complex transaction (bulk insert employees in a transaction)
+POST {{baseUrl}}/api/StandardData/DoComplexTransaction
+Content-Type: application/json
+
+[
+  {
+    "id": "aaaa1111-2222-3333-4444-bbbbcDccdd3d",
+    "name": "Charlie Baker",
+    "salary": 71000,
+    "departmentId": "{{departmentId}}"
+  },
+  {
+    "id": "cccc1111-2222-3333-4444-bDbbccc25aaa",
+    "name": "Denise Miller",
+    "salary": 80000,
+    "departmentId": "{{departmentId}}"
+  }
+]
+
+### 6. Advanced query: employees with salary > 50000, ordered by salary desc, with department info
+GET {{baseUrl}}/api/StandardData/Employees/advanced-query
+
+### 7. Upsert (insert or update) a single employee
+POST {{baseUrl}}/api/StandardData/Employees/upsert
+Content-Type: application/json
+
+{
+  "id": "{{employeeId}}",
+  "name": "Jane Doe",
+  "salary": 72000,
+  "departmentId": "{{departmentId}}"
+}
+
+### 8. Bulk delete employees by IDs
+DELETE {{baseUrl}}/api/StandardData/Employees/bulk-delete
+Content-Type: application/json
+
+[
+  "{{employeeId}}",
+  "11111111-2222-3333-4444-555555555555",
+  "66666666-7777-8888-9999-000000000000"
+]

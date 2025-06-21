@@ -1,0 +1,6 @@
+@baseUrl = https://localhost:7161
+@employeeId = aaaa1111-2222-3333-4444-bbbbccccdd4d
+
+###
+# Find employee by ID using the overrided repository
+GET {{baseUrl}}/api/OverridedRepositoryData/find?key={{employeeId}}

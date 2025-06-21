@@ -1,0 +1,9 @@
+﻿@baseUrl = https://localhost:7032
+
+###
+# Call additional method on extended & overrided repository
+GET {{baseUrl}}/api/ExtendedAndOverridedRepositoryData/additional-method
+
+###
+# Get all employees using extended & overrided repository
+GET {{baseUrl}}/api/ExtendedAndOverridedRepositoryData/get-employees

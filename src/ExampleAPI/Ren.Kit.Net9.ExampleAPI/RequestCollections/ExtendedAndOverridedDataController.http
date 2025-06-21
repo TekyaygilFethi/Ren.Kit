@@ -1,0 +1,7 @@
+@baseUrl = https://localhost:7032
+
+### 1. Call Additional Method
+GET {{baseUrl}}/api/ExtendedAndOverridedData/additional-method
+
+### 2. Call GetRepository with key query parameter
+GET {{baseUrl}}/api/ExtendedAndOverridedData/get-repository?key=myKey

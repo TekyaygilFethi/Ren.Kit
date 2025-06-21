@@ -1,0 +1,4 @@
+@baseUrl = https://localhost:7161
+
+### Call the additional in-memory cache method
+GET {{baseUrl}}/api/ExtendedInMemoryCache/additional-method?key=myKey

@@ -1,0 +1,4 @@
+@baseUrl = https://localhost:7032
+
+### Call the additional unit of work method
+GET {{baseUrl}}/api/ExtendedData/additional-method

@@ -1,0 +1,5 @@
+@baseUrl = https://localhost:7161
+@cacheKey = myKey
+
+### Get cache value by key
+GET {{baseUrl}}/api/OverridedCache/get?key={{cacheKey}}
