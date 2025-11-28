@@ -1,121 +1,176 @@
-﻿# REN.Kit.CacheKit
+﻿# 🦌 REN.Kit.CacheKit
 
-**REN.Kit.CacheKit** is the next-generation evolution of the popular [RenHelpers.DataAccessHelpers](https://www.nuget.org/packages/RENHelpers.DataAccessHelpers) package—modernized, optimized, and fully reimagined for .NET 8, .NET 9, and beyond.
+**REN.Kit.CacheKit** is an enterprise-grade, provider-agnostic caching toolkit for .NET.
+It offers modern, high-performance caching with both **In-Memory** and **Redis** support through a clean and simple API.
 
-> ⚠️ **Notice:**  
-> The legacy `RenHelpers` and `RenHelpers.DataAccessHelpers` packages are now obsolete. All new features and updates are exclusively delivered via REN.Kit.
----
-
-## 🚀 What is REN.Kit.CacheKit?
-
-REN.Kit.CacheKit is an **enterprise-ready caching toolkit** for .NET applications.  
-It provides robust, production-grade caching services for both **In-Memory** and **Redis** out-of-the-box, with advanced extensibility for custom logic.
-
-- Lightning-fast in-memory caching
-- Scalable, distributed Redis cache support
-- Clean interface with synchronous and asynchronous APIs
-- Full support for .NET 8 and .NET 9
-- Effortless extensibility (override or extend any method)
-- Plug-and-play integration—start caching in minutes
+> ✔️ Fully compatible with **.NET 8**, **.NET 9**, and **.NET 10**
 
 ---
 
-## 🏁 Quick Start
+## 🚀 Why REN.Kit.CacheKit?
 
-**1. Install the Package**
+| Feature | Status |
+|--------|:-----:|
+| In-Memory Cache | ✔️ |
+| Redis Distributed Cache | ✔️ |
+| Async + Sync APIs | ✔️ |
+| Plug-and-play DI registration | ✔️ |
+| Unified Cache Abstraction | ✔️ |
+| Custom serialization | ✔️ |
+| Provider-agnostic & Extensible | ✔️ |
 
-```shell
+- Abstracted caching interface → switch providers **without rewriting code**
+- Developer controls **Redis multiplexer factory** & **lifetime**
+- Safe defaults, strong performance, high flexibility
+
+---
+
+## ⚙️ Installation
+
+```sh
 dotnet add package REN.Kit.CacheKit
 ```
 
-**2. Configure Your Cache**
-Add your cache configuration to `appsettings.json`:
+---
+
+## 🧩 Choose Your Cache Provider
+
+Cache provider is selected during DI registration.
+
+### 🧠 In-Memory Cache (default & fastest)
+
+```csharp
+builder.Services.AddRENCaching(CacheType.InMemory);
+```
+
+---
+
+### 🧱 Redis Cache (distributed & scalable)
+
+```csharp
+Func<IServiceProvider, IConnectionMultiplexer> redisMultiplexerProvider = sp =>
+{
+    var config = sp.GetRequiredService<IConfiguration>();
+    var options = new ConfigurationOptions
+    {
+        EndPoints = { config["CacheConfiguration:RedisConfiguration:Url"] },
+        DefaultDatabase = int.Parse(config["CacheConfiguration:RedisConfiguration:DatabaseId"] ?? "0"),
+        User = config["CacheConfiguration:RedisConfiguration:Username"],
+        Password = config["CacheConfiguration:RedisConfiguration:Password"],
+        AbortOnConnectFail = bool.Parse(config["CacheConfiguration:RedisConfiguration:AbortOnConnectFail"] ?? "false")
+    };
+    return ConnectionMultiplexer.Connect(options);
+};
+
+builder.Services.AddRENCaching(
+    CacheType.Redis,
+    redisMultiplexerProvider,
+    RedisMultiplexerLifetime.Singleton);
+```
+
+> 🧠 Recommended: `Singleton` multiplexer lifetime for production apps
+
+---
+
+## 🛠️ Usage
+
+Inject the unified interface → provider becomes irrelevant:
+
+```csharp
+public class WeatherService(IRENCacheService cache)
+{
+    public async Task<Weather?> GetWeatherAsync(string city)
+    {
+        return await cache.GetOrCreateAsync(
+            $"weather:{city}",
+            async _ => await FetchWeatherFromApi(city),
+            absoluteExpiration: TimeSpan.FromMinutes(15)
+        );
+    }
+}
+```
+
+---
+
+### Basic Operations
+
+```csharp
+cache.Set("user:1", user);
+var user = cache.Get<User>("user:1");
+
+await cache.RemoveAsync("user:1");
+await cache.ClearAsync();
+```
+
+---
+
+## 📝 Optional Configuration (appsettings.json)
 
 ```json
 "CacheConfiguration": {
-  "InMemoryConfiguration": {
-    "TimeConfiguration": {
-      "AbsoluteExpirationInHours": 12,
-      "SlidingExpirationInMinutes": 30
-    }
-  },
   "RedisConfiguration": {
     "Url": "localhost:6379",
-    "TimeConfiguration": {
-      "AbsoluteExpirationInHours": 12
-    },
     "DatabaseId": 0,
     "Username": "default",
     "Password": "mypwd",
-    "AbortOnConnectFail": false,
-    "IsAdmin": false
+    "AbortOnConnectFail": false
   }
 }
 ```
 
-**3. Register the Service in Program.cs**
-```csharp
-builder.Services.AddRENCaching(RegisterRENCaching.CacheType.InMemory); // For In-Memory caching
+Provides flexibility: Json, env variables, secrets, remote key stores—you decide.
 
-builder.Services.AddRENCaching(RegisterRENCaching.CacheType.Redis); // For Redis caching
-```
+---
 
-**4. Inject and Use the Service**
+## 🔌 Extensibility
+
+Override anything easily:
+
 ```csharp
-public class HomeController(IRENCacheService cacheService) : ControllerBase
+public class CustomRedisCache : RENRedisCacheService
 {
-    [HttpPost("set")]
-    public async Task<IActionResult> SetCache([FromQuery] string key, [FromBody] object value)
-    {
-        await cacheService.SetAsync(key, value, TimeSpan.FromMinutes(10));
-        return Ok("Value cached.");
-    }
+    public CustomRedisCache(IConnectionMultiplexer mux)
+        : base(mux) { }
+
+    public override void Remove(string key)
+        => Console.WriteLine($"Cache removed: {key}");
 }
 ```
 
-## 🔥 Why REN.Kit.CacheKit?
+Register custom implementation:
 
-- **Modern:** Designed for .NET 8+ and cloud-native workloads
-- **Extensible:** Easily override or extend any caching behavior
-- **Battle-Tested:** Ready for production and enterprise-scale projects
-- **Plug-and-Play:** Integrate in minutes—no boilerplate required
-- **Reliable:** Robust expiration policies, async/sync support, and easy migration
+```csharp
+builder.Services.AddScoped<IRENCacheService, CustomRedisCache>();
+```
 
 ---
 
-## 🏢 Enterprise-Grade Features
+## 📐 Why Redis Factory & Lifetime From Consumer?
 
-- Seamless support for **In-Memory** and **Redis** cache
-- Automatic dependency injection
-- Works with any .NET 8 or .NET 9 project
-- Production-ready design and configuration
-- Advanced extensibility for custom requirements
+✔ Architecture flexibility  
+✔ Connection pooling correctness  
+✔ Perfect for multi-tenant and high-scale systems  
+✔ Easy test-ability with mocks  
+✔ Zero configuration assumptions in the library
 
----
-
-## 📦 Migrating from RenHelpers?
-
-Migration is easy—your favorite caching features have been modernized and improved.  
-Simply uninstall the old package and install **REN.Kit.CacheKit**.  
-Check the documentation for full migration details and code samples.
+Your app decides how Redis should behave — **not the package**.
 
 ---
 
 ## 📚 Documentation
 
-Explore the [Full Documentation](https://fethis-organization.gitbook.io/ren.kit-documentation/) for guides, examples, and migration tips.
+📘 Complete guides & best practices:  
+➡ https://fethis-organization.gitbook.io/ren.kit-documentation/
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are welcome! See [CONTRIBUTING](https://fethis-organization.gitbook.io/ren.kit-documentation/contribution) for guidelines.
+We welcome feature ideas and PRs!  
+Let’s build a better caching experience together 🦌
 
 ---
 
-
 **REN.Kit.CacheKit**  
-Regular. Everyday. Normal. Now, even faster and more reliable.
-
-_Built for developers, by developers._  
-**Start supercharging your .NET caching with REN.Kit today!**
+Regular. Everyday. Normal.  
+**Super-powered caching for .NET** 🚀

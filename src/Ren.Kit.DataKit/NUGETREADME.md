@@ -13,45 +13,13 @@ REN.Kit.DataKit is an **enterprise-ready library suite** designed to simplify an
 It provides robust, production-grade implementations of the **Unit of Work** and **Repository** patterns, along with advanced extensibility for custom business logic and transactions.
 
 - **Battle-tested design patterns** (Unit of Work & Repository) out of the box  
-- Native support for .NET 8 and .NET 9  
+- Native support for .NET 8, .NET 9 and .NET 10 
 - Works seamlessly with **EF Core**, **MSSQL**, **PostgreSQL**, and more  
 - Full LINQ, bulk, and transactional support  
 - Highly extensible and override-friendly  
 - Clean, maintainable, and production-proven architecture
 
 ---
-
-## 🏁 Quick Start
-
-**1. Install the Package**
-
-```shell
-dotnet add package REN.Kit.DataKit
-```
-
-**2. Register the Services**
-In your `Program.cs`:
-
-```csharp
-builder.Services.RegisterRENDataServices();
-```
-
-**3. Use in Your Application**
-
-Inject IRENUnitOfWork<TDbContext> into your controllers/services:
-```csharp
-[Route("api/[controller]")]
-[ApiController]
-public class UsersController(IRENUnitOfWork<AppDbContext> unitOfWork) : ControllerBase
-{
-    [HttpGet]
-    public async Task<IActionResult> GetUsers()
-    {
-        var users = await unitOfWork.GetRepository<User>().GetListAsync();
-        return Ok(users);
-    }
-}
-```
 
 ## 🔥 Why REN.Kit.DataKit?
 

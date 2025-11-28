@@ -13,7 +13,7 @@ REN.Kit.DataKit is an **enterprise-ready library suite** designed to simplify an
 It provides robust, production-grade implementations of the **Unit of Work** and **Repository** patterns, along with advanced extensibility for custom business logic and transactions.
 
 - **Battle-tested design patterns** (Unit of Work & Repository) out of the box  
-- Native support for .NET 8 and .NET 9  
+> Fully compatible with **.NET 8**, **.NET 9**, and **.NET 10**
 - Works seamlessly with **EF Core**, **MSSQL**, **PostgreSQL**, and more  
 - Full LINQ, bulk, and transactional support  
 - Highly extensible and override-friendly  
@@ -106,5 +106,3 @@ Regular. Everyday. Normal. Now, even more powerful.
 
 _Built for developers, by developers.  
 Get started with REN.Kit and modernize your .NET data access today!_
-
-

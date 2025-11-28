@@ -26,7 +26,13 @@ public class RENRedisCacheService : IRENCacheService
     {
         var data = _cacheDb.StringGet(cacheKey);
         if (!data.HasValue) return default;
-        try { return JsonSerializer.Deserialize<T>(data, _jsonOptions); }
+        try
+        {
+            var json = (string?)data;
+            return json is null
+                ? default
+                : JsonSerializer.Deserialize<T>(json, _jsonOptions);
+        }
         catch { return default; }
     }
 
@@ -36,7 +42,13 @@ public class RENRedisCacheService : IRENCacheService
         cancellationToken.ThrowIfCancellationRequested();
         var data = await _cacheDb.StringGetAsync(cacheKey);
         if (!data.HasValue) return default;
-        try { return JsonSerializer.Deserialize<T>(data, _jsonOptions); }
+        try
+        {
+            var json = (string?)data;
+            return json is null
+                ? default
+                : JsonSerializer.Deserialize<T>(json, _jsonOptions);
+        }
         catch { return default; }
     }
 

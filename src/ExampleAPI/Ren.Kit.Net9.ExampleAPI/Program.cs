@@ -1,11 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Ren.Kit.CacheKit.Extensions;
 using Ren.Kit.DataKit.Extensions;
 using Ren.Kit.Net9.ExampleAPI.Customizations.Extend.Abstractions;
 using Ren.Kit.Net9.ExampleAPI.Customizations.Extend.Services;
 using Ren.Kit.Net9.ExampleAPI.Customizations.ExtendAndOverride.Services;
 using Ren.Kit.Net9.ExampleAPI.Customizations.Override.Services;
 using Ren.Kit.Net9.ExampleAPI.Data.Database;
-using Ren.Kit.Net9.ExampleAPI.Extensions;
+using StackExchange.Redis;
+using static Ren.Kit.CacheKit.Extensions.RENExtensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,31 +20,46 @@ builder.Services.AddControllers()
         opts.JsonSerializerOptions.MaxDepth = 64;
     });
 
+var configuration = builder.Configuration;
+
 #region REN Cache Kit Register
 
+Func<IServiceProvider, IConnectionMultiplexer> redisMultiplexerProvider = provider =>
+{
+    var redisOptions = new ConfigurationOptions
+    {
+        EndPoints = { configuration.GetSection("CacheConfiguration:RedisConfiguration:Url")?.Value },
+        DefaultDatabase = int.Parse(configuration.GetSection("CacheConfiguration:RedisConfiguration:DatabaseId")?.Value ?? "0"),
+        AbortOnConnectFail = bool.Parse(configuration.GetSection("CacheConfiguration:RedisConfiguration:AbortOnConnectFail")?.Value),
+        User = configuration.GetSection("CacheConfiguration:RedisConfiguration:Username")?.Value,
+        Password = configuration.GetSection("CacheConfiguration:RedisConfiguration:Password")?.Value
+    };
+    return ConnectionMultiplexer.Connect(redisOptions);
+};
+
 //For Standard In Memory Cache Service Injection
-builder.Services.AddRENCaching(RegisterRENCaching.CacheType.InMemory); // comment this out if not used
+builder.Services.AddRENCaching(CacheType.InMemory); // comment this out if not used
 
 ////For Standard Redis Cache Service Injection
-//builder.Services.AddRENCaching(RegisterRENCaching.CacheType.Redis); // comment this out if not used
+//builder.Services.AddRENCaching(CacheType.Redis, redisMultiplexerProvider, RedisMultiplexerLifetime.Singleton); // comment this out if not used
 
 //// For Overrided In Memory Cache Service Injection
-//builder.Services.AddRENCaching<OverridedRENInMemoryCacheService>(RegisterRENCaching.CacheType.InMemory); // comment this out if not used
+//builder.Services.AddRENCaching<OverridedRENInMemoryCacheService>(CacheType.InMemory); // comment this out if not used
 
 //// For Overrided IRedis Cache Service Injection
-//builder.Services.AddRENCaching<OverridedRENRedisCacheService>(RegisterRENCaching.CacheType.Redis); // comment this out if not used
+//builder.Services.AddRENCaching<OverridedRENRedisCacheService>(CacheType.Redis, redisMultiplexerProvider, RedisMultiplexerLifetime.Singleton); // comment this out if not used
 
 //// For Extended In Memory Cache Service Injection
-//builder.Services.AddRENCaching<IExtendedRENInMemoryCacheService, ExtendedRENInMemoryCacheService>(RegisterRENCaching.CacheType.InMemory); // comment this out if not used
+//builder.Services.AddRENCaching<IExtendedRENInMemoryCacheService, ExtendedRENInMemoryCacheService>(CacheType.InMemory); // comment this out if not used
 
 //// For Extended IRedis Cache Service Injection
-//builder.Services.AddRENCaching<IExtendedRENRedisCacheService, ExtendedRENRedisCacheService>(RegisterRENCaching.CacheType.Redis); // comment this out if not used
+//builder.Services.AddRENCaching<IExtendedRENRedisCacheService, ExtendedRENRedisCacheService>(CacheType.Redis, redisMultiplexerProvider, RedisMultiplexerLifetime.Singleton); // comment this out if not used
 
 //// For Extended And Overrided In Memory Cache Service Injection
-//builder.Services.AddRENCaching<IExtendedRENInMemoryCacheService, ExtendedAndOverridedRENInMemoryCacheService>(RegisterRENCaching.CacheType.InMemory); // comment this out if not used
+//builder.Services.AddRENCaching<IExtendedRENInMemoryCacheService, ExtendedAndOverridedRENInMemoryCacheService>(CacheType.InMemory); // comment this out if not used
 
 //// For Extended And Overrided IRedis Cache Service Injection
-//builder.Services.AddRENCaching<IExtendedRENRedisCacheService, ExtendedAndOverridedRENRedisCacheService>(RegisterRENCaching.CacheType.Redis); // comment this out if not used
+//builder.Services.AddRENCaching<IExtendedRENRedisCacheService, ExtendedAndOverridedRENRedisCacheService>(CacheType.Redis, redisMultiplexerProvider, RedisMultiplexerLifetime.Singleton); // comment this out if not used
 #endregion
 
 // REN Database Injections
