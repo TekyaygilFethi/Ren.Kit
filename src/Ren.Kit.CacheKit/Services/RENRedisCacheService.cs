@@ -131,4 +131,58 @@ public class RENRedisCacheService : IRENCacheService
 
         return value;
     }
+
+    /// <inheritdoc/>
+    public virtual async Task HashSetAsync<T>(
+        string key,
+        string field,
+        T value,
+        TimeSpan? absoluteExpiration = null)
+    {
+        var json = JsonSerializer.Serialize(value, _jsonOptions);
+
+        // Field insert/update
+        await _cacheDb.HashSetAsync(key, field, json);
+
+        // Hash TTL yönetimi KEY bazlıdır
+        if (absoluteExpiration.HasValue)
+            await _cacheDb.KeyExpireAsync(key, absoluteExpiration);
+    }
+
+    /// <inheritdoc/>
+    public virtual async Task<T?> HashGetAsync<T>(string key, string field)
+    {
+        var data = await _cacheDb.HashGetAsync(key, field);
+        if (!data.HasValue) return default;
+
+        try
+        {
+            return JsonSerializer.Deserialize<T>(data.ToString()!, _jsonOptions);
+        }
+        catch { return default; }
+    }
+
+    /// <inheritdoc/>
+    public virtual async Task<bool> HashDeleteFieldAsync(string key, string field)
+    {
+        return await _cacheDb.HashDeleteAsync(key, field);
+    }
+
+    /// <inheritdoc/>
+    public virtual async Task<HashSet<string>> HashGetAllFieldsAsync(string key)
+    {
+        var entries = await _cacheDb.HashKeysAsync(key);
+        return entries.Select(e => (string)e).ToHashSet();
+    }
+
+    /// <inheritdoc/>
+    public virtual async Task<Dictionary<string, T>> HashGetAllAsync<T>(string key)
+    {
+        var hashEntries = await _cacheDb.HashGetAllAsync(key);
+        return hashEntries
+            .ToDictionary(
+                x => x.Name.ToString(),
+                x => JsonSerializer.Deserialize<T>(x.Value.ToString()!, _jsonOptions)!
+            );
+    }
 }

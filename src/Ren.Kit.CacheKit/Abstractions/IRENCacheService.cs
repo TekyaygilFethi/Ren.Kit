@@ -73,5 +73,55 @@ public interface IRENCacheService
         TimeSpan? slidingExpiration = null,
         CancellationToken cancellationToken = default
     );
+
+    /// <summary>
+    /// Adds or updates a hash field within the specified Redis key.
+    /// If the key does not exist, a new Redis Hash is created.
+    /// 
+    /// TTL (if provided) applies at the HASH KEY level, not per-field.
+    /// </summary>
+    /// <typeparam name="T">Type of the object to cache.</typeparam>
+    /// <param name="key">Redis hash key.</param>
+    /// <param name="field">Field identifier within the hash.</param>
+    /// <param name="value">Value to store.</param>
+    /// <param name="absoluteExpiration">Optional expiration time for the key.</param>
+    Task HashSetAsync<T>(
+        string key,
+        string field,
+        T value,
+        TimeSpan? absoluteExpiration = null
+    );
+
+    /// <summary>
+    /// Gets a value stored in a hash field. Returns default if the field does not exist
+    /// or value cannot be deserialized.
+    /// </summary>
+    /// <typeparam name="T">Expected type of the cached value.</typeparam>
+    /// <param name="key">Redis hash key.</param>
+    /// <param name="field">Field identifier within the hash.</param>
+    Task<T?> HashGetAsync<T>(string key, string field);
+
+    /// <summary>
+    /// Removes a hash field from the Redis key.
+    /// Returns true if the field existed and was removed; otherwise false.
+    /// </summary>
+    /// <param name="key">Redis hash key.</param>
+    /// <param name="field">Field identifier to remove.</param>
+    Task<bool> HashDeleteFieldAsync(string key, string field);
+
+    /// <summary>
+    /// Retrieves all field names stored within the Redis hash.
+    /// Useful for listing keys like symbol identifiers.
+    /// </summary>
+    /// <param name="key">Redis hash key.</param>
+    Task<HashSet<string>> HashGetAllFieldsAsync(string key);
+
+    /// <summary>
+    /// Retrieves all fields and values from a hash key,
+    /// deserializing them into a Dictionary.
+    /// </summary>
+    /// <typeparam name="T">Expected type of all values in the hash.</typeparam>
+    /// <param name="key">Redis hash key.</param>
+    Task<Dictionary<string, T>> HashGetAllAsync<T>(string key);
 }
 

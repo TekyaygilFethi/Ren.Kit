@@ -76,7 +76,7 @@ public class RENInMemoryCacheService : IRENCacheService
     public virtual void Clear()
     {
         // IMemoryCache does not support global clear, must be implemented if you track keys yourself.
-        // This is left blank intentionally or you can throw NotSupportedException.
+        // This is left blank intentionally.
         throw new NotSupportedException("IMemoryCache does not natively support clearing all cache entries. Implement key tracking if needed.");
     }
 
@@ -102,5 +102,40 @@ public class RENInMemoryCacheService : IRENCacheService
         if (value is not null)
             Set(cacheKey, value, absoluteExpiration, slidingExpiration);
         return value;
+    }
+
+    /// <inheritdoc/>
+    public Task HashSetAsync<T>(string key, string field, T value, TimeSpan? absoluteExpiration = null)
+    {
+        // This is left blank intentionally.
+        throw new NotImplementedException();
+    }
+
+    /// <inheritdoc/>
+    public Task<T?> HashGetAsync<T>(string key, string field)
+    {
+        // This is left blank intentionally.
+        throw new NotImplementedException();
+    }
+
+    /// <inheritdoc/>
+    public Task<bool> HashDeleteFieldAsync(string key, string field)
+    {
+        // This is left blank intentionally.
+        throw new NotImplementedException();
+    }
+
+    /// <inheritdoc/>
+    public Task<HashSet<string>> HashGetAllFieldsAsync(string key)
+    {
+        // This is left blank intentionally.
+        throw new NotImplementedException();
+    }
+
+    /// <inheritdoc/>
+    public Task<Dictionary<string, T>> HashGetAllAsync<T>(string key)
+    {
+        // This is left blank intentionally.
+        throw new NotImplementedException();
     }
 }

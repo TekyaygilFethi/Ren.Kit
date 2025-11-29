@@ -12,8 +12,7 @@
 		<PackageIcon>reindeer_lowest.png</PackageIcon>
 		<RepositoryUrl>https://github.com/TekyaygilFethi/Ren.Kit</RepositoryUrl>
 		<PackageReleaseNotes>
-			- Initial release: Unified caching for .NET with Redis and in-memory support.
-			- Added .NET 10 (net10.0) target framework support.
+			- Added hashset operation support for Redis
 		</PackageReleaseNotes>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
@@ -23,7 +22,7 @@
 		<PackageReadmeFile>NUGETREADME.md</PackageReadmeFile>
 		<Copyright>Copyright (c) 2025 Fethi Tekyaygil</Copyright>
 
-		<Version>1.1.1</Version>
+		<Version>1.2.0</Version>
 
 		<TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
 	</PropertyGroup>
