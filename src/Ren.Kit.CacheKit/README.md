@@ -1,31 +1,26 @@
 ﻿# 🦌 REN.Kit.CacheKit
 
-**REN.Kit.CacheKit** is an enterprise-grade, provider-agnostic caching toolkit for .NET.
-It offers modern, high-performance caching with both **In-Memory** and **Redis** support through a clean and simple API.
+**REN.Kit.CacheKit** is an enterprise-grade, provider-agnostic caching toolkit for .NET — now fully updated with **.NET 10 support** and an even **simpler DI registration** experience.
 
-> ✔️ Fully compatible with **.NET 8**, **.NET 9**, and **.NET 10**
+Designed to give you performance, flexibility, and clean architecture — without the configuration headache 🚀
 
 ---
 
-## 🚀 Why REN.Kit.CacheKit?
+## 🌟 What’s New?
 
 | Feature | Status |
 |--------|:-----:|
-| In-Memory Cache | ✔️ |
-| Redis Distributed Cache | ✔️ |
-| Async + Sync APIs | ✔️ |
-| Plug-and-play DI registration | ✔️ |
+| .NET 10 Support | ✔️ |
+| Reduced DI complexity | ✔️ |
 | Unified Cache Abstraction | ✔️ |
-| Custom serialization | ✔️ |
-| Provider-agnostic & Extensible | ✔️ |
+| Redis Multiplexer Lifetime Control | ✔️ |
+| Zero assumptions on your architecture | ✔️ |
 
-- Abstracted caching interface → switch providers **without rewriting code**
-- Developer controls **Redis multiplexer factory** & **lifetime**
-- Safe defaults, strong performance, high flexibility
+Just choose the provider you want — everything else is handled for you.
 
 ---
 
-## ⚙️ Installation
+## ⚡ Installation
 
 ```sh
 dotnet add package REN.Kit.CacheKit
@@ -33,9 +28,9 @@ dotnet add package REN.Kit.CacheKit
 
 ---
 
-## 🧩 Choose Your Cache Provider
+## 🧩 Easy Provider Selection
 
-Cache provider is selected during DI registration.
+Cache provider is selected directly in **service registration**:
 
 ### 🧠 In-Memory Cache (default & fastest)
 
@@ -68,13 +63,13 @@ builder.Services.AddRENCaching(
     RedisMultiplexerLifetime.Singleton);
 ```
 
-> 🧠 Recommended: `Singleton` multiplexer lifetime for production apps
+> 🧠 Best practice: Use `Singleton` multiplexer lifetime in production
 
 ---
 
 ## 🛠️ Usage
 
-Inject the unified interface → provider becomes irrelevant:
+Inject the unified interface — your code doesn’t care which provider is active:
 
 ```csharp
 public class WeatherService(IRENCacheService cache)
@@ -84,7 +79,7 @@ public class WeatherService(IRENCacheService cache)
         return await cache.GetOrCreateAsync(
             $"weather:{city}",
             async _ => await FetchWeatherFromApi(city),
-            absoluteExpiration: TimeSpan.FromMinutes(15)
+            TimeSpan.FromMinutes(15)
         );
     }
 }
@@ -104,7 +99,7 @@ await cache.ClearAsync();
 
 ---
 
-## 📝 Optional Configuration (appsettings.json)
+## 📝 Optional Redis Configuration
 
 ```json
 "CacheConfiguration": {
@@ -118,13 +113,13 @@ await cache.ClearAsync();
 }
 ```
 
-Provides flexibility: Json, env variables, secrets, remote key stores—you decide.
+Use JSON, Env vars, secret managers — **REN.Kit does not force any configuration style on you**.
 
 ---
 
 ## 🔌 Extensibility
 
-Override anything easily:
+Override anything, add your own logic:
 
 ```csharp
 public class CustomRedisCache : RENRedisCacheService
@@ -133,11 +128,11 @@ public class CustomRedisCache : RENRedisCacheService
         : base(mux) { }
 
     public override void Remove(string key)
-        => Console.WriteLine($"Cache removed: {key}");
+        => Console.WriteLine($"Removed: {key}");
 }
 ```
 
-Register custom implementation:
+Register your custom implementation:
 
 ```csharp
 builder.Services.AddScoped<IRENCacheService, CustomRedisCache>();
@@ -145,32 +140,32 @@ builder.Services.AddScoped<IRENCacheService, CustomRedisCache>();
 
 ---
 
-## 📐 Why Redis Factory & Lifetime From Consumer?
+## 🔍 Why the Redis Factory & Lifetime Are External?
 
-✔ Architecture flexibility  
-✔ Connection pooling correctness  
-✔ Perfect for multi-tenant and high-scale systems  
-✔ Easy test-ability with mocks  
-✔ Zero configuration assumptions in the library
+✔ Architecture freedom  
+✔ Correct resource management (no hidden multiplexers!)  
+✔ Works with multi-tenant & advanced redis topologies  
+✔ Fully testable (mocks allowed)  
+✔ Provider behavior controlled by **you**, not by the library  
 
-Your app decides how Redis should behave — **not the package**.
+> Your app decides how Redis should work — not CacheKit 🦌
 
 ---
 
 ## 📚 Documentation
 
-📘 Complete guides & best practices:  
+📘 Full docs & best practices:  
 ➡ https://fethis-organization.gitbook.io/ren.kit-documentation/
 
 ---
 
 ## 🤝 Contributing
 
-We welcome feature ideas and PRs!  
-Let’s build a better caching experience together 🦌
+We love contributions! 🎯  
+Whether it’s a feature idea, PR, or bug report — let’s build a better caching toolkit together.
 
 ---
 
 **REN.Kit.CacheKit**  
 Regular. Everyday. Normal.  
-**Super-powered caching for .NET** 🚀
+Now even faster — **Power up your .NET caching today** 🚀
