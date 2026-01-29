@@ -92,7 +92,7 @@ public class RENRedisCacheService : IRENCacheService
     }
 
     /// <inheritdoc/>
-    public async Task RemoveAsync(string cacheKey, CancellationToken cancellationToken = default)
+    public async virtual Task RemoveAsync(string cacheKey, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
         await _cacheDb.KeyDeleteAsync(cacheKey);
