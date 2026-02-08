@@ -194,4 +194,12 @@ public class RENInMemoryCacheService : IRENCacheService
         throw new NotImplementedException();
     }
 
+    /// <inheritdoc/>
+    public Task<Dictionary<string, byte[]?>> GetBytesManyAsync(
+        IEnumerable<string> keys,
+        CancellationToken cancellationToken = default)
+    {  
+        // This is left blank intentionally.
+        throw new NotImplementedException();
+    }
 }

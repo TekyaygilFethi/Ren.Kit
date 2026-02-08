@@ -442,4 +442,42 @@ public class RENRedisCacheService : IRENCacheService
         return dict;
     }
 
+    /// <inheritdoc/>
+    public virtual async Task<Dictionary<string, byte[]?>> GetBytesManyAsync(
+        IEnumerable<string> keys,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var arr = keys
+            .Where(k => !string.IsNullOrWhiteSpace(k))
+            .Distinct(StringComparer.Ordinal)
+            .Select(k => (RedisKey)k)
+            .ToArray();
+
+        if (arr.Length == 0)
+            return new Dictionary<string, byte[]?>(0);
+
+        try
+        {
+            var values = await _cacheDb.StringGetAsync(arr).ConfigureAwait(false);
+
+            var dict = new Dictionary<string, byte[]?>(arr.Length, StringComparer.Ordinal);
+            for (int i = 0; i < arr.Length; i++)
+            {
+                var v = values[i];
+                dict[arr[i]!] = v.HasValue ? (byte[])v! : null;
+            }
+
+            return dict;
+        }
+        catch (RedisTimeoutException)
+        {
+            return arr.ToDictionary(k => (string)k!, _ => (byte[]?)null, StringComparer.Ordinal);
+        }
+        catch (RedisConnectionException)
+        {
+            return arr.ToDictionary(k => (string)k!, _ => (byte[]?)null, StringComparer.Ordinal);
+        }
+    }
 }

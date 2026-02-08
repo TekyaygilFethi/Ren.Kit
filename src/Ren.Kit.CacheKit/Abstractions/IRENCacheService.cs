@@ -174,5 +174,14 @@ public interface IRENCacheService
     /// </summary>
     Task<Dictionary<string, byte[]>> HashGetAllBytesAsync(string key);
 
+    /// <summary>
+    /// Retrieves multiple raw binary cache entries in a single Redis call.
+    /// Missing keys are returned with null values.
+    /// </summary>
+    /// <param name="keys">Cache keys to retrieve.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    Task<Dictionary<string, byte[]?>> GetBytesManyAsync(
+        IEnumerable<string> keys,
+        CancellationToken cancellationToken = default);
 }
 
