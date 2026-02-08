@@ -362,4 +362,84 @@ public class RENRedisCacheService : IRENCacheService
         if (newTtl > TimeSpan.Zero)
             _ = await _cacheDb.KeyExpireAsync(cacheKey, newTtl).ConfigureAwait(false);
     }
+
+    /// <inheritdoc/>
+    public virtual byte[]? GetBytes(string cacheKey)
+    {
+        var data = _cacheDb.StringGet(cacheKey);
+        if (!data.HasValue) return null;
+
+        // RedisValue can hold raw bytes natively.
+        return (byte[])data!;
+    }
+
+    /// <inheritdoc/>
+    public virtual async Task<byte[]?> GetBytesAsync(string cacheKey, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var data = await _cacheDb.StringGetAsync(cacheKey).ConfigureAwait(false);
+        if (!data.HasValue) return null;
+
+        return (byte[])data!;
+    }
+
+    /// <inheritdoc/>
+    public virtual void SetBytes(string cacheKey, byte[] data, TimeSpan? absoluteExpiration = null)
+    {
+        var ttl = absoluteExpiration ?? TimeSpan.FromHours(_defaultAbsoluteExpirationHours);
+        _cacheDb.StringSet(cacheKey, data, ttl);
+    }
+
+    /// <inheritdoc/>
+    public virtual async Task SetBytesAsync(
+        string cacheKey,
+        byte[] data,
+        TimeSpan? absoluteExpiration = null,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var ttl = absoluteExpiration ?? TimeSpan.FromHours(_defaultAbsoluteExpirationHours);
+        await _cacheDb.StringSetAsync(cacheKey, data, ttl).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public virtual async Task HashSetBytesAsync(
+        string key,
+        string field,
+        byte[] value,
+        TimeSpan? absoluteExpiration = null)
+    {
+        await _cacheDb.HashSetAsync(key, field, value).ConfigureAwait(false);
+
+        if (absoluteExpiration.HasValue)
+            await _cacheDb.KeyExpireAsync(key, absoluteExpiration).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public virtual async Task<byte[]?> HashGetBytesAsync(string key, string field)
+    {
+        var data = await _cacheDb.HashGetAsync(key, field).ConfigureAwait(false);
+        if (!data.HasValue) return null;
+
+        return (byte[])data!;
+    }
+
+    /// <inheritdoc/>
+    public virtual async Task<Dictionary<string, byte[]>> HashGetAllBytesAsync(string key)
+    {
+        var hashEntries = await _cacheDb.HashGetAllAsync(key).ConfigureAwait(false);
+
+        var dict = new Dictionary<string, byte[]>(hashEntries.Length, StringComparer.Ordinal);
+        foreach (var x in hashEntries)
+        {
+            if (!x.Value.HasValue) continue;
+
+            dict[x.Name.ToString()] = (byte[])x.Value!;
+        }
+
+        return dict;
+    }
+
 }

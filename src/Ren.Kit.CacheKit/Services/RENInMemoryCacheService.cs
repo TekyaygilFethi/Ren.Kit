@@ -138,4 +138,60 @@ public class RENInMemoryCacheService : IRENCacheService
         // This is left blank intentionally.
         throw new NotImplementedException();
     }
+
+    /// <inheritdoc/>
+    public virtual byte[]? GetBytes(string cacheKey)
+    {
+        if (_cache.TryGetValue(cacheKey, out var value) && value is byte[] bytes)
+            return bytes;
+        return null;
+    }
+
+    /// <inheritdoc/>
+    public virtual Task<byte[]?> GetBytesAsync(string cacheKey, CancellationToken cancellationToken = default)
+        => Task.FromResult(GetBytes(cacheKey));
+
+    /// <inheritdoc/>
+    public virtual void SetBytes(string cacheKey, byte[] data, TimeSpan? absoluteExpiration = null)
+    {
+        var options = new MemoryCacheEntryOptions
+        {
+            AbsoluteExpirationRelativeToNow = absoluteExpiration ?? _defaultOptions.AbsoluteExpirationRelativeToNow
+        };
+
+        _cache.Set(cacheKey, data, options);
+    }
+
+    /// <inheritdoc/>
+    public virtual Task SetBytesAsync(
+        string cacheKey,
+        byte[] data,
+        TimeSpan? absoluteExpiration = null,
+        CancellationToken cancellationToken = default)
+    {
+        SetBytes(cacheKey, data, absoluteExpiration);
+        return Task.CompletedTask;
+    }
+
+    /// <inheritdoc/>
+    public Task HashSetBytesAsync(string key, string field, byte[] value, TimeSpan? absoluteExpiration = null)
+    {
+        // This is left blank intentionally.
+        throw new NotImplementedException();
+    }
+
+    /// <inheritdoc/>
+    public Task<byte[]?> HashGetBytesAsync(string key, string field)
+    {
+        // This is left blank intentionally.
+        throw new NotImplementedException();
+    }
+
+    /// <inheritdoc/>
+    public Task<Dictionary<string, byte[]>> HashGetAllBytesAsync(string key)
+    {
+        // This is left blank intentionally.
+        throw new NotImplementedException();
+    }
+
 }

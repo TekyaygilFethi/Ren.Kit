@@ -123,5 +123,56 @@ public interface IRENCacheService
     /// <typeparam name="T">Expected type of all values in the hash.</typeparam>
     /// <param name="key">Redis hash key.</param>
     Task<Dictionary<string, T>> HashGetAllAsync<T>(string key);
+
+    /// <summary>
+    /// Retrieves raw binary payload stored at <paramref name="cacheKey"/>.
+    /// Returns null if not found.
+    /// 
+    /// Use this when the caller performs external serialization (e.g., MessagePack).
+    /// </summary>
+    byte[]? GetBytes(string cacheKey);
+
+    /// <summary>
+    /// Asynchronously retrieves raw binary payload stored at <paramref name="cacheKey"/>.
+    /// Returns null if not found.
+    /// 
+    /// Use this when the caller performs external serialization (e.g., MessagePack).
+    /// </summary>
+    Task<byte[]?> GetBytesAsync(string cacheKey, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Stores raw binary payload at <paramref name="cacheKey"/> with optional absolute expiration.
+    /// 
+    /// Sliding expiration is not handled here; this method is format-agnostic and expects the caller
+    /// to manage any higher-level policy if needed.
+    /// </summary>
+    void SetBytes(string cacheKey, byte[] data, TimeSpan? absoluteExpiration = null);
+
+    /// <summary>
+    /// Asynchronously stores raw binary payload at <paramref name="cacheKey"/> with optional absolute expiration.
+    /// 
+    /// Sliding expiration is not handled here; this method is format-agnostic and expects the caller
+    /// to manage any higher-level policy if needed.
+    /// </summary>
+    Task SetBytesAsync(string cacheKey, byte[] data, TimeSpan? absoluteExpiration = null, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Adds or updates a hash field within the specified Redis key using raw binary payload.
+    /// If the key does not exist, a new Redis Hash is created.
+    /// 
+    /// TTL (if provided) applies at the HASH KEY level, not per-field.
+    /// </summary>
+    Task HashSetBytesAsync(string key, string field, byte[] value, TimeSpan? absoluteExpiration = null);
+
+    /// <summary>
+    /// Gets a raw binary payload stored in a hash field. Returns null if the field does not exist.
+    /// </summary>
+    Task<byte[]?> HashGetBytesAsync(string key, string field);
+
+    /// <summary>
+    /// Retrieves all fields and raw binary payloads from a hash key as a Dictionary.
+    /// </summary>
+    Task<Dictionary<string, byte[]>> HashGetAllBytesAsync(string key);
+
 }
 
