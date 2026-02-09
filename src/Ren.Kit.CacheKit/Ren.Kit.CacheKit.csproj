@@ -12,7 +12,8 @@
 		<PackageIcon>reindeer_lowest.png</PackageIcon>
 		<RepositoryUrl>https://github.com/TekyaygilFethi/Ren.Kit</RepositoryUrl>
 		<PackageReleaseNotes>
-			- Added bulk binary insertion support for Redis cache
+			- Expanded cache contract with enterprise features: Exists, Refresh (TTL touch), bulk remove, atomic increment, bulk hash operations, and bulk binary writes.
+			- Aligned InMemory and Redis providers for multi-key operations and completed XML documentation for all public APIs.
 		</PackageReleaseNotes>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
@@ -22,7 +23,7 @@
 		<PackageReadmeFile>NUGETREADME.md</PackageReadmeFile>
 		<Copyright>Copyright (c) 2025 Fethi Tekyaygil</Copyright>
 
-		<Version>1.6.2</Version>
+		<Version>1.6.3</Version>
 
 		<TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
 	</PropertyGroup>
