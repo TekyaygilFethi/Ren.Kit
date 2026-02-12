@@ -27,7 +27,6 @@ public static class RENExtensions
         Scoped,
         Transient
     }
-
     public static void AddRENCaching(
         this IServiceCollection services,
         IConfiguration configuration,
@@ -36,11 +35,7 @@ public static class RENExtensions
         RedisMultiplexerLifetime? multiplexerLifetime = null,
         CacheServiceLifetime cacheServiceLifetime = CacheServiceLifetime.Scoped)
     {
-        services.Configure<RENCacheKitOptions>(options =>
-        {
-            configuration.GetSection("CacheConfiguration").Bind(options.CacheConfiguration);
-        });
-
+        AddRenOptions(services, configuration);
         services.AddRENCaching(cacheType, implementationFactory, multiplexerLifetime, cacheServiceLifetime);
     }
 
@@ -53,11 +48,7 @@ public static class RENExtensions
         CacheServiceLifetime cacheServiceLifetime = CacheServiceLifetime.Scoped)
         where TCacheService : class, IRENCacheService
     {
-        services.Configure<RENCacheKitOptions>(options =>
-        {
-            configuration.GetSection("CacheConfiguration").Bind(options.CacheConfiguration);
-        });
-
+        AddRenOptions(services, configuration);
         services.AddRENCaching<TCacheService>(cacheType, implementationFactory, multiplexerLifetime, cacheServiceLifetime);
     }
 
@@ -71,14 +62,9 @@ public static class RENExtensions
         where TICacheService : class, IRENCacheService
         where TCacheService : class, TICacheService
     {
-        services.Configure<RENCacheKitOptions>(options =>
-        {
-            configuration.GetSection("CacheConfiguration").Bind(options.CacheConfiguration);
-        });
-
+        AddRenOptions(services, configuration);
         services.AddRENCaching<TICacheService, TCacheService>(cacheType, implementationFactory, multiplexerLifetime, cacheServiceLifetime);
     }
-
     public static void AddRENCaching(
         this IServiceCollection services,
         CacheType cacheType,
@@ -95,7 +81,7 @@ public static class RENExtensions
             case CacheType.Redis:
                 AddRedisRENCache<RENRedisCacheService>(
                     services,
-                    implementationFactory!,
+                    implementationFactory ?? throw new ArgumentNullException(nameof(implementationFactory)),
                     multiplexerLifetime ?? RedisMultiplexerLifetime.Singleton,
                     cacheServiceLifetime);
                 break;
@@ -122,7 +108,7 @@ public static class RENExtensions
             case CacheType.Redis:
                 AddRedisRENCache<TCacheService>(
                     services,
-                    implementationFactory!,
+                    implementationFactory ?? throw new ArgumentNullException(nameof(implementationFactory)),
                     multiplexerLifetime ?? RedisMultiplexerLifetime.Singleton,
                     cacheServiceLifetime);
                 break;
@@ -150,7 +136,7 @@ public static class RENExtensions
             case CacheType.Redis:
                 AddRedisRENCache<TICacheService, TCacheService>(
                     services,
-                    implementationFactory!,
+                    implementationFactory ?? throw new ArgumentNullException(nameof(implementationFactory)),
                     multiplexerLifetime ?? RedisMultiplexerLifetime.Singleton,
                     cacheServiceLifetime);
                 break;
@@ -159,95 +145,122 @@ public static class RENExtensions
                 throw new ArgumentOutOfRangeException(nameof(cacheType), cacheType, null);
         }
     }
+    private static void AddRenOptions(IServiceCollection services, IConfiguration configuration)
+    {
+        services.Configure<RENCacheKitOptions>(options =>
+        {
+            configuration
+                .GetSection("CacheConfiguration")
+                .Bind(options.CacheConfiguration);
+        });
+    }
 
     private static void AddInMemoryRENCache<TCacheService>(
         IServiceCollection services,
-        CacheServiceLifetime cacheServiceLifetime)
+        CacheServiceLifetime lifetime)
         where TCacheService : class, IRENCacheService
     {
         services.AddMemoryCache();
-        services.RegisterRENCacheServices<TCacheService>(cacheServiceLifetime);
+        services.RegisterRENCacheServices<TCacheService>(lifetime);
     }
 
     private static void AddInMemoryRENCache<TICacheService, TCacheService>(
         IServiceCollection services,
-        CacheServiceLifetime cacheServiceLifetime)
+        CacheServiceLifetime lifetime)
         where TICacheService : class, IRENCacheService
         where TCacheService : class, TICacheService
     {
         services.AddMemoryCache();
-        services.RegisterRENCacheServices<TICacheService, TCacheService>(cacheServiceLifetime);
+        services.RegisterRENCacheServices<TICacheService, TCacheService>(lifetime);
     }
 
     private static void AddRedisRENCache<TCacheService>(
         IServiceCollection services,
-        Func<IServiceProvider, IConnectionMultiplexer> implementationFactory,
+        Func<IServiceProvider, IConnectionMultiplexer> factory,
         RedisMultiplexerLifetime multiplexerLifetime,
-        CacheServiceLifetime cacheServiceLifetime)
+        CacheServiceLifetime lifetime)
         where TCacheService : class, IRENCacheService
     {
-        services.GetBaseRedisInjectImplementations(implementationFactory, multiplexerLifetime);
-        services.RegisterRENCacheServices<TCacheService>(cacheServiceLifetime);
+        services.GetBaseRedisInjectImplementations(factory, multiplexerLifetime);
+        services.RegisterRENCacheServices<TCacheService>(lifetime);
     }
 
     private static void AddRedisRENCache<TICacheService, TCacheService>(
         IServiceCollection services,
-        Func<IServiceProvider, IConnectionMultiplexer> implementationFactory,
+        Func<IServiceProvider, IConnectionMultiplexer> factory,
         RedisMultiplexerLifetime multiplexerLifetime,
-        CacheServiceLifetime cacheServiceLifetime)
+        CacheServiceLifetime lifetime)
         where TICacheService : class, IRENCacheService
         where TCacheService : class, TICacheService
     {
-        services.GetBaseRedisInjectImplementations(implementationFactory, multiplexerLifetime);
-        services.RegisterRENCacheServices<TICacheService, TCacheService>(cacheServiceLifetime);
+        services.GetBaseRedisInjectImplementations(factory, multiplexerLifetime);
+        services.RegisterRENCacheServices<TICacheService, TCacheService>(lifetime);
     }
 
     private static void GetBaseRedisInjectImplementations(
         this IServiceCollection services,
-        Func<IServiceProvider, IConnectionMultiplexer> implementationFactory,
-        RedisMultiplexerLifetime multiplexerRuntime)
+        Func<IServiceProvider, IConnectionMultiplexer> factory,
+        RedisMultiplexerLifetime lifetime)
     {
-        if (multiplexerRuntime == RedisMultiplexerLifetime.Singleton)
-            services.AddSingleton(implementationFactory);
-        else if (multiplexerRuntime == RedisMultiplexerLifetime.Scoped)
-            services.AddScoped(implementationFactory);
-        else if (multiplexerRuntime == RedisMultiplexerLifetime.Transient)
-            services.AddTransient(implementationFactory);
-        else
-            throw new ArgumentOutOfRangeException(nameof(multiplexerRuntime), multiplexerRuntime, null);
+        switch (lifetime)
+        {
+            case RedisMultiplexerLifetime.Singleton:
+                services.AddSingleton(factory);
+                break;
+            case RedisMultiplexerLifetime.Scoped:
+                services.AddScoped(factory);
+                break;
+            case RedisMultiplexerLifetime.Transient:
+                services.AddTransient(factory);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
+        }
     }
 
     private static IServiceCollection RegisterRENCacheServices<TCacheService>(
         this IServiceCollection services,
-        CacheServiceLifetime cacheServiceLifetime)
+        CacheServiceLifetime lifetime)
         where TCacheService : class, IRENCacheService
     {
-        if (cacheServiceLifetime == CacheServiceLifetime.Singleton)
-            services.AddSingleton(typeof(IRENCacheService), typeof(TCacheService));
-        else if (cacheServiceLifetime == CacheServiceLifetime.Scoped)
-            services.AddScoped(typeof(IRENCacheService), typeof(TCacheService));
-        else if (cacheServiceLifetime == CacheServiceLifetime.Transient)
-            services.AddTransient(typeof(IRENCacheService), typeof(TCacheService));
-        else
-            throw new ArgumentOutOfRangeException(nameof(cacheServiceLifetime), cacheServiceLifetime, null);
+        switch (lifetime)
+        {
+            case CacheServiceLifetime.Singleton:
+                services.AddSingleton(typeof(IRENCacheService), typeof(TCacheService));
+                break;
+            case CacheServiceLifetime.Scoped:
+                services.AddScoped(typeof(IRENCacheService), typeof(TCacheService));
+                break;
+            case CacheServiceLifetime.Transient:
+                services.AddTransient(typeof(IRENCacheService), typeof(TCacheService));
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
+        }
 
         return services;
     }
 
     private static IServiceCollection RegisterRENCacheServices<TICacheService, TCacheService>(
         this IServiceCollection services,
-        CacheServiceLifetime cacheServiceLifetime)
+        CacheServiceLifetime lifetime)
         where TICacheService : class, IRENCacheService
         where TCacheService : class, TICacheService
     {
-        if (cacheServiceLifetime == CacheServiceLifetime.Singleton)
-            services.AddSingleton(typeof(TICacheService), typeof(TCacheService));
-        else if (cacheServiceLifetime == CacheServiceLifetime.Scoped)
-            services.AddScoped(typeof(TICacheService), typeof(TCacheService));
-        else if (cacheServiceLifetime == CacheServiceLifetime.Transient)
-            services.AddTransient(typeof(TICacheService), typeof(TCacheService));
-        else
-            throw new ArgumentOutOfRangeException(nameof(cacheServiceLifetime), cacheServiceLifetime, null);
+        switch (lifetime)
+        {
+            case CacheServiceLifetime.Singleton:
+                services.AddSingleton(typeof(TICacheService), typeof(TCacheService));
+                break;
+            case CacheServiceLifetime.Scoped:
+                services.AddScoped(typeof(TICacheService), typeof(TCacheService));
+                break;
+            case CacheServiceLifetime.Transient:
+                services.AddTransient(typeof(TICacheService), typeof(TCacheService));
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(lifetime), lifetime, null);
+        }
 
         return services;
     }
