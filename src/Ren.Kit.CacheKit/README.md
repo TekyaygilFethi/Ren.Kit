@@ -103,7 +103,7 @@ await cache.ClearAsync();
 
 ```json
 "CacheConfiguration": {
-  "UseDefaultAbsoluteExpirationWhenNull": "true",
+  "UseDefaultAbsoluteExpirationWhenNull": true,
   "RedisConfiguration": {
     "Url": "localhost:6379",
     "DatabaseId": 0,

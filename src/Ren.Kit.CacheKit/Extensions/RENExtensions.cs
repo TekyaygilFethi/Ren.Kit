@@ -29,23 +29,55 @@ public static class RENExtensions
     }
 
     public static void AddRENCaching(
-    this IServiceCollection services,
-    IConfiguration configuration,
-    CacheType cacheType,
-    Func<IServiceProvider, IConnectionMultiplexer>? implementationFactory = null,
-    RedisMultiplexerLifetime? multiplexerLifetime = null,
-    CacheServiceLifetime cacheServiceLifetime = CacheServiceLifetime.Scoped)
+        this IServiceCollection services,
+        IConfiguration configuration,
+        CacheType cacheType,
+        Func<IServiceProvider, IConnectionMultiplexer>? implementationFactory = null,
+        RedisMultiplexerLifetime? multiplexerLifetime = null,
+        CacheServiceLifetime cacheServiceLifetime = CacheServiceLifetime.Scoped)
     {
         services.Configure<RENCacheKitOptions>(options =>
         {
-            configuration
-                .GetSection("CacheConfiguration")
-                .Bind(options.CacheConfiguration);
+            configuration.GetSection("CacheConfiguration").Bind(options.CacheConfiguration);
         });
 
         services.AddRENCaching(cacheType, implementationFactory, multiplexerLifetime, cacheServiceLifetime);
     }
 
+    public static void AddRENCaching<TCacheService>(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        CacheType cacheType,
+        Func<IServiceProvider, IConnectionMultiplexer>? implementationFactory = null,
+        RedisMultiplexerLifetime? multiplexerLifetime = null,
+        CacheServiceLifetime cacheServiceLifetime = CacheServiceLifetime.Scoped)
+        where TCacheService : class, IRENCacheService
+    {
+        services.Configure<RENCacheKitOptions>(options =>
+        {
+            configuration.GetSection("CacheConfiguration").Bind(options.CacheConfiguration);
+        });
+
+        services.AddRENCaching<TCacheService>(cacheType, implementationFactory, multiplexerLifetime, cacheServiceLifetime);
+    }
+
+    public static void AddRENCaching<TICacheService, TCacheService>(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        CacheType cacheType,
+        Func<IServiceProvider, IConnectionMultiplexer>? implementationFactory = null,
+        RedisMultiplexerLifetime? multiplexerLifetime = null,
+        CacheServiceLifetime cacheServiceLifetime = CacheServiceLifetime.Scoped)
+        where TICacheService : class, IRENCacheService
+        where TCacheService : class, TICacheService
+    {
+        services.Configure<RENCacheKitOptions>(options =>
+        {
+            configuration.GetSection("CacheConfiguration").Bind(options.CacheConfiguration);
+        });
+
+        services.AddRENCaching<TICacheService, TCacheService>(cacheType, implementationFactory, multiplexerLifetime, cacheServiceLifetime);
+    }
 
     public static void AddRENCaching(
         this IServiceCollection services,
