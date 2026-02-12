@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Ren.Kit.CacheKit.Abstractions;
 using Ren.Kit.CacheKit.Services;
 using StackExchange.Redis;
@@ -26,6 +27,25 @@ public static class RENExtensions
         Scoped,
         Transient
     }
+
+    public static void AddRENCaching(
+    this IServiceCollection services,
+    IConfiguration configuration,
+    CacheType cacheType,
+    Func<IServiceProvider, IConnectionMultiplexer>? implementationFactory = null,
+    RedisMultiplexerLifetime? multiplexerLifetime = null,
+    CacheServiceLifetime cacheServiceLifetime = CacheServiceLifetime.Scoped)
+    {
+        services.Configure<RENCacheKitOptions>(options =>
+        {
+            configuration
+                .GetSection("CacheConfiguration")
+                .Bind(options.CacheConfiguration);
+        });
+
+        services.AddRENCaching(cacheType, implementationFactory, multiplexerLifetime, cacheServiceLifetime);
+    }
+
 
     public static void AddRENCaching(
         this IServiceCollection services,

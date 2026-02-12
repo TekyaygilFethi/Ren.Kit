@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-
-namespace Ren.Kit.CacheKit.Abstractions
+﻿namespace Ren.Kit.CacheKit.Abstractions
 {
     public interface IRENCacheService
     {
